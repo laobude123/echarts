@@ -7,8 +7,8 @@
     <style>
         * { margin: 0; padding: 0; }
         body { 
-            /* 背景改为透明 */
-            background: transparent; 
+            /* 关键1：body背景透明 */
+            background: transparent !important; 
             width: 100vw; 
             height: 100vh; 
             overflow: hidden;
@@ -59,8 +59,8 @@
             "barWidth": 78,
             "lineWidth": 3,
             "fontSize": 22,
-            // ⚠️ 关键修改：背景色改为 null（透明）
-            "background": null
+            // 关键2：使用 'transparent' 而不是 null
+            "background": "transparent"
         };
 
         function getOption(s) {
@@ -132,7 +132,7 @@
             });
             return {
                 animationDuration: 500,
-                // ⚠️ 关键修改：背景色改为 null（透明）
+                // 关键3：ECharts 背景设置为透明
                 backgroundColor: s.background,
                 grid: { top: 26, left: 78, right: 40, bottom: 70 },
                 tooltip: {
