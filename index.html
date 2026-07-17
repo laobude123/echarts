@@ -6,15 +6,12 @@
     <title>图表</title>
     <style>
         * { margin: 0; padding: 0; }
-        body { 
-            /* 关键1：body背景透明 */
+        html, body { 
+            /* 关键：HTML和body都透明 */
             background: transparent !important; 
-            width: 100vw; 
-            height: 100vh; 
+            width: 100%; 
+            height: 100%; 
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
         #chart {
             width: 100%;
@@ -24,6 +21,45 @@
 </head>
 <body>
     <div id="chart"></div>
+
+    <!-- ============================================================
+    核心：加载后立即清除父级iframe的白色背景
+    无需任何外部文件，完全自包含
+    ============================================================ -->
+    <script>
+        (function() {
+            // 方法1：通过 frameElement 获取当前 iframe 元素
+            try {
+                var iframe = window.frameElement;
+                if (iframe) {
+                    iframe.style.backgroundColor = 'transparent';
+                    iframe.style.background = 'transparent';
+                    console.log('✅ 已清除 iframe 背景（通过 frameElement）');
+                }
+            } catch(e) {
+                console.warn('⚠️ 无法通过 frameElement 访问父级:', e.message);
+            }
+
+            // 方法2：如果上面的方法不行，尝试通过 parent 遍历
+            try {
+                if (window.parent && window.parent.document) {
+                    var iframes = window.parent.document.getElementsByTagName('iframe');
+                    for (var i = 0; i < iframes.length; i++) {
+                        try {
+                            if (iframes[i].contentWindow === window) {
+                                iframes[i].style.backgroundColor = 'transparent';
+                                iframes[i].style.background = 'transparent';
+                                console.log('✅ 已清除 iframe 背景（通过遍历）');
+                                break;
+                            }
+                        } catch(e) {}
+                    }
+                }
+            } catch(e) {
+                console.warn('⚠️ 无法通过 parent.document 访问:', e.message);
+            }
+        })();
+    </script>
 
     <!-- 加载 ECharts 核心库 -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js">
@@ -59,7 +95,6 @@
             "barWidth": 78,
             "lineWidth": 3,
             "fontSize": 22,
-            // 关键2：使用 'transparent' 而不是 null
             "background": "transparent"
         };
 
@@ -132,7 +167,6 @@
             });
             return {
                 animationDuration: 500,
-                // 关键3：ECharts 背景设置为透明
                 backgroundColor: s.background,
                 grid: { top: 26, left: 78, right: 40, bottom: 70 },
                 tooltip: {
