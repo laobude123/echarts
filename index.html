@@ -7,7 +7,6 @@
     <style>
         * { margin: 0; padding: 0; }
         html, body { 
-            /* 关键：HTML和body都透明 */
             background: transparent !important; 
             width: 100%; 
             height: 100%; 
@@ -22,25 +21,17 @@
 <body>
     <div id="chart"></div>
 
-    <!-- ============================================================
-    核心：加载后立即清除父级iframe的白色背景
-    无需任何外部文件，完全自包含
-    ============================================================ -->
+    <!-- 清除父级 iframe 白色背景（自包含，无需外部文件） -->
     <script>
         (function() {
-            // 方法1：通过 frameElement 获取当前 iframe 元素
             try {
                 var iframe = window.frameElement;
                 if (iframe) {
                     iframe.style.backgroundColor = 'transparent';
                     iframe.style.background = 'transparent';
-                    console.log('✅ 已清除 iframe 背景（通过 frameElement）');
                 }
-            } catch(e) {
-                console.warn('⚠️ 无法通过 frameElement 访问父级:', e.message);
-            }
+            } catch(e) {}
 
-            // 方法2：如果上面的方法不行，尝试通过 parent 遍历
             try {
                 if (window.parent && window.parent.document) {
                     var iframes = window.parent.document.getElementsByTagName('iframe');
@@ -49,15 +40,12 @@
                             if (iframes[i].contentWindow === window) {
                                 iframes[i].style.backgroundColor = 'transparent';
                                 iframes[i].style.background = 'transparent';
-                                console.log('✅ 已清除 iframe 背景（通过遍历）');
                                 break;
                             }
                         } catch(e) {}
                     }
                 }
-            } catch(e) {
-                console.warn('⚠️ 无法通过 parent.document 访问:', e.message);
-            }
+            } catch(e) {}
         })();
     </script>
 
@@ -67,7 +55,7 @@
 
     <script>
         // ============================================================
-        // unity-use.js 的配置代码
+        // 配置代码
         // ============================================================
         const hexToRgba = (hex, a) => { const n = parseInt(hex.replace('#', ''), 16); return `rgba(${n >> 16}, ${n >> 8 & 255}, ${n & 255}, ${a})`; };
 
@@ -173,10 +161,35 @@
                     trigger: 'axis',
                     backgroundColor: 'rgba(18,25,33,.94)',
                     borderColor: 'rgba(157,216,251,.45)',
-                    textStyle: { color: '#e8f3fa' },
+                    borderWidth: 2,
+                    // ========================================
+                    // 关键修改：提示框文字字号翻倍
+                    // ========================================
+                    textStyle: {
+                        color: '#e8f3fa',
+                        fontSize: 24,        // 原来是 12，翻倍到 24
+                        fontWeight: 600,
+                        lineHeight: 36
+                    },
+                    padding: [16, 24],        // 内边距也适当加大
                     axisPointer: {
                         type: 'shadow',
                         shadowStyle: { color: 'rgba(255,255,255,.035)' }
+                    },
+                    // 鼠标悬浮时显示所有系列的数据
+                    formatter: function(params) {
+                        var result = '<div style="font-size:24px;font-weight:600;margin-bottom:8px;">' + params[0].axisValue + '</div>';
+                        params.forEach(function(item) {
+                            var color = item.color || '#fff';
+                            var seriesName = item.seriesName || '';
+                            var value = item.value !== undefined ? item.value : '-';
+                            result += '<div style="display:flex;justify-content:space-between;align-items:center;gap:40px;padding:4px 0;">';
+                            result += '<span><span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:' + color + ';margin-right:12px;vertical-align:middle;"></span>';
+                            result += '<span style="vertical-align:middle;">' + seriesName + '</span></span>';
+                            result += '<span style="font-weight:700;">' + value + '</span>';
+                            result += '</div>';
+                        });
+                        return result;
                     }
                 },
                 xAxis: {
